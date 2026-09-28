@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"final/pkg/api"
 	"final/pkg/db"
 	"final/tests"
 )
@@ -24,14 +25,15 @@ func main() {
 		return
 	}
 
+	api.Init()
+
 	// 3. Запускаем сервер
 	port := os.Getenv("TODO_PORT")
 	if port == "" {
 		port = strconv.Itoa(tests.Port)
 	}
-	addr := ":" + port
 
 	http.Handle("/", http.FileServer(http.Dir("./web")))
 	fmt.Println("Сервер запущен на http://localhost:" + port)
-	http.ListenAndServe(addr, nil)
+	http.ListenAndServe(":"+port, nil)
 }
