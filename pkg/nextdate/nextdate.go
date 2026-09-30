@@ -9,7 +9,7 @@ import (
 )
 
 // Проверка на прошлое
-func afterNow(date, now time.Time) bool {
+func AfterNow(date, now time.Time) bool {
 	n := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	return date.After(n)
 }
@@ -29,7 +29,7 @@ func nextDateByDays(now time.Time, d time.Time, q string) (string, error) {
 
 	for {
 		d = d.AddDate(0, 0, days)
-		if afterNow(d, now) {
+		if AfterNow(d, now) {
 			break
 		}
 	}
@@ -40,7 +40,7 @@ func nextDateByDays(now time.Time, d time.Time, q string) (string, error) {
 func nextDateByYear(now time.Time, d time.Time) (string, error) {
 	for {
 		d = d.AddDate(1, 0, 0)
-		if afterNow(d, now) {
+		if AfterNow(d, now) {
 			break
 		}
 	}
@@ -167,7 +167,7 @@ func nextDateByMonthDays(now time.Time, d time.Time, rule []string) (string, err
 			continue
 		}
 		// Выходим если день совпал
-		if matchesDay(d, days) && afterNow(d, now) {
+		if matchesDay(d, days) && AfterNow(d, now) {
 			return d.Format("20060102"), nil
 		}
 	}

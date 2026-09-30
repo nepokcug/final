@@ -33,7 +33,7 @@ func main() {
 		port = strconv.Itoa(tests.Port)
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./web")))
+	http.Handle("/", http.FileServer(http.Dir("../web")))
 	fmt.Println("Сервер запущен на http://localhost:" + port)
 	http.ListenAndServe(":"+port, nil)
 }

@@ -4,4 +4,15 @@ import "net/http"
 
 func Init() {
 	http.HandleFunc("/api/nextdate", nextDayHandler)
+	http.HandleFunc("/api/task", taskHandler)
+	http.HandleFunc("/api/tasks", tasksHandler)
+}
+
+func taskHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		addTaskHandler(w, r)
+	default:
+		writeJson(w, map[string]string{"error": "метод не поддерживается"})
+	}
 }
