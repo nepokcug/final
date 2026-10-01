@@ -21,7 +21,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 3. Проверка даты
-	if err := checkdate(&task); err != nil {
+	if err := checkDate(&task); err != nil {
 		writeJson(w, map[string]string{"error": err.Error()})
 		return
 	}

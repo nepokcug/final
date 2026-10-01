@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func checkdate(task *db.Task) error {
+func checkDate(task *db.Task) error {
 	// Если дата не указана присваиваем текущее время
 	now := time.Now()
 	if task.Date == "" {
