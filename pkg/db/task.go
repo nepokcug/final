@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"final/pkg/nextdate"
 	"time"
 )
 
@@ -77,7 +78,6 @@ func scanTasks(rows *sql.Rows) ([]*Task, error) {
 	if tasks == nil {
 		tasks = []*Task{}
 	}
-
 	return tasks, nil
 }
 
@@ -107,6 +107,54 @@ func UpdateTask(task *Task) error {
 	}
 	if count == 0 {
 		return errors.New("некорректный id для обновления информации")
+	}
+	return nil
+}
+
+func DoneTask(id string) error {
+	// 1. Получаем задачу
+	task, err := GetTask(id)
+	if err != nil {
+		return err
+	}
+	// 2. Если нет правила повторения -> удаляем
+	if task.Repeat == "" {
+		return DeleteTask(id)
+	}
+	// 3. Находим дату согласно правилу
+	next, err := nextdate.NextDate(time.Now(), task.Date, task.Repeat)
+	if err != nil {
+		return err
+	}
+	return UpdateDate(next, id)
+}
+
+func DeleteTask(id string) error {
+	res, err := DB.Exec("DELETE FROM scheduler WHERE id=?", id)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("задача не найдена")
+	}
+	return nil
+}
+
+func UpdateDate(next string, id string) error {
+	res, err := DB.Exec("UPDATE scheduler SET date=? WHERE id=?", next, id)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("задача не найдена")
 	}
 	return nil
 }

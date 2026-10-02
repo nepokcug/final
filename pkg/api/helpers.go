@@ -29,7 +29,7 @@ func checkDate(task *db.Task) error {
 		}
 	}
 
-	if !nextdate.AfterNow(t, now) {
+	if nextdate.AfterNow(now, t) {
 		if task.Repeat == "" {
 			task.Date = now.Format("20060102")
 		} else {

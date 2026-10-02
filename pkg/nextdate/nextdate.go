@@ -10,8 +10,9 @@ import (
 
 // Проверка на прошлое
 func AfterNow(date, now time.Time) bool {
+	d := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	n := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	return date.After(n)
+	return d.After(n)
 }
 
 func nextDateByDays(now time.Time, d time.Time, q string) (string, error) {
@@ -26,14 +27,12 @@ func nextDateByDays(now time.Time, d time.Time, q string) (string, error) {
 	if days < 1 || days > 400 {
 		return "", errors.New("число дней должно быть от 1 до 400")
 	}
-
 	for {
 		d = d.AddDate(0, 0, days)
 		if AfterNow(d, now) {
 			break
 		}
 	}
-
 	return d.Format("20060102"), nil
 }
 
