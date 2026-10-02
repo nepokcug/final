@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -11,11 +11,11 @@ import (
 	"final/tests"
 )
 
-func main() {
+func Run() {
 	// 1. Определяем путь к БД
 	dbFile := os.Getenv("TODO_DBFILE")
 	if dbFile == "" {
-		dbFile = tests.DBFile
+		dbFile = "scheduler.db"
 	}
 
 	// 2. Инициализируем БД
@@ -33,7 +33,7 @@ func main() {
 		port = strconv.Itoa(tests.Port)
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("../web")))
+	http.Handle("/", http.FileServer(http.Dir("./web")))
 	fmt.Println("Сервер запущен на http://localhost:" + port)
 	http.ListenAndServe(":"+port, nil)
 }
