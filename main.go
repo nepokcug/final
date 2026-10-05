@@ -1,7 +1,14 @@
 package main
 
-import "final/pkg/server"
+import (
+	"final/pkg/server"
+	"fmt"
+)
 
 func main() {
-	server.Run()
+
+	if err := server.Run(); err != nil {
+		fmt.Println("Ошибка запуска сервера:", err)
+		return
+	}
 }

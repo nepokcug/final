@@ -11,7 +11,7 @@ import (
 	"final/tests"
 )
 
-func Run() {
+func Run() error {
 	// 1. Определяем путь к БД
 	dbFile := os.Getenv("TODO_DBFILE")
 	if dbFile == "" {
@@ -21,8 +21,7 @@ func Run() {
 	// 2. Инициализируем БД
 	err := db.Init(dbFile)
 	if err != nil {
-		fmt.Println("Ошибка БД:", err)
-		return
+		return fmt.Errorf("ошибка БД: %w", err)
 	}
 
 	api.Init()
@@ -35,5 +34,5 @@ func Run() {
 
 	http.Handle("/", http.FileServer(http.Dir("./web")))
 	fmt.Println("Сервер запущен на http://localhost:" + port)
-	http.ListenAndServe(":"+port, nil)
+	return http.ListenAndServe(":"+port, nil)
 }
