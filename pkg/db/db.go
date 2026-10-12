@@ -49,11 +49,13 @@ func Init(dbFile string) error {
 	// 4. Открываем БД
 	DB, err = sql.Open("sqlite", dbFile)
 	if err != nil {
+		DB.Close()
 		return err
 	}
 
 	// 5. Проверяем соединение
 	if err := DB.Ping(); err != nil {
+		DB.Close()
 		return err
 	}
 
@@ -61,6 +63,7 @@ func Init(dbFile string) error {
 	if install {
 		_, err = DB.Exec(schema)
 		if err != nil {
+			DB.Close()
 			return err
 		}
 	}

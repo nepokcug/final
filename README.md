@@ -10,7 +10,6 @@
 - Регистрация задачи
 - Список задач клиента
 - Изменение статуса задачи
-- Изменение адреса доставки
 - Удаление задачи
 - JWT-аутентификация
 - Поиск задач по названию и дате
@@ -93,7 +92,9 @@ docker build -t my-tracker:v1 .
 ```bash
 docker run -d --name tracker \
     -p 7540:7540 \
-    -v "$(pwd)/scheduler.db:/app/scheduler.db" \
+    -v "$(pwd)/data:/app/data" \
+    -e TODO_DBFILE=/app/data/scheduler.db \
+    -e TODO_PASSWORD=secret123 \
     my-tracker:v1
 ```
 

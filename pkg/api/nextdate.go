@@ -13,6 +13,10 @@ const dateFormat = "20060102"
 
 // nextDayHandler обрабатывает GET /api/nextdate
 func nextDayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJson(w, map[string]string{"error": "метод не поддерживается"}, http.StatusMethodNotAllowed)
+		return
+	}
 	// 1. Читаем параметры
 	nowStr := r.FormValue("now")
 	dateStr := r.FormValue("date")

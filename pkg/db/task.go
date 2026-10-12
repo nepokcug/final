@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"errors"
-	"final/pkg/nextdate"
 	"time"
 )
 
@@ -39,7 +38,9 @@ func Tasks(search string, limit int) ([]*Task, error) {
 		}
 		defer rows.Close()
 		return scanTasks(rows)
-	} else if t, err := time.Parse("02.01.2006", search); err == nil { // 2. Если парсится -> время
+	}
+	// 2. Если парсится -> время
+	if t, err := time.Parse("02.01.2006", search); err == nil {
 		date := t.Format("20060102")
 		rows, err := DB.Query("SELECT id,date,title,comment,repeat FROM scheduler WHERE date=? ORDER BY title LIMIT ?", date, limit)
 		if err != nil {
@@ -47,15 +48,15 @@ func Tasks(search string, limit int) ([]*Task, error) {
 		}
 		defer rows.Close()
 		return scanTasks(rows)
-	} else { // 3. Если не пусто и не время -> запрос
-		rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE ? ORDER BY date LIMIT ?",
-			"%"+search+"%", limit)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-		return scanTasks(rows)
 	}
+	// 3. Если не пусто и не время -> запрос
+	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE ? OR comment LIKE ? ORDER BY date LIMIT ?",
+		"%"+search+"%", "%"+search+"%", limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanTasks(rows)
 }
 
 // scanTasks читает строки из rows и возвращает слайс задач
@@ -109,24 +110,6 @@ func UpdateTask(task *Task) error {
 		return errors.New("некорректный id для обновления информации")
 	}
 	return nil
-}
-
-func DoneTask(id string) error {
-	// 1. Получаем задачу
-	task, err := GetTask(id)
-	if err != nil {
-		return err
-	}
-	// 2. Если нет правила повторения -> удаляем
-	if task.Repeat == "" {
-		return DeleteTask(id)
-	}
-	// 3. Находим дату согласно правилу
-	next, err := nextdate.NextDate(time.Now(), task.Date, task.Repeat)
-	if err != nil {
-		return err
-	}
-	return UpdateDate(next, id)
 }
 
 func DeleteTask(id string) error {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"final/pkg/db"
 	"final/pkg/nextdate"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,10 +18,10 @@ func checkDate(task *db.Task) error {
 	// Если дата не указана присваиваем текущее время
 	now := time.Now()
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 	// Проверяем что указана корректная дата
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(dateFormat, task.Date)
 	if err != nil {
 		return errors.New("неверный формат даты")
 	}
@@ -35,7 +36,7 @@ func checkDate(task *db.Task) error {
 
 	if nextdate.AfterNow(now, t) {
 		if task.Repeat == "" {
-			task.Date = now.Format("20060102")
+			task.Date = now.Format(dateFormat)
 		} else {
 			task.Date = next
 		}
@@ -43,16 +44,20 @@ func checkDate(task *db.Task) error {
 	return nil
 }
 
-func writeJson(w http.ResponseWriter, data any) {
+func writeJson(w http.ResponseWriter, data any, statusCode int) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(data)
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		fmt.Println("Ошибка сериализации JSON:", err)
+	}
+
 }
 
 func validateJWT(tokenStr, pass string) bool {
 	// Парсим токен
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
 		return jwtSecret, nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil || !token.Valid {
 		return false
 	}

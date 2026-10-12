@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const format string = "20060102"
+
 // Проверка на прошлое
 func AfterNow(date, now time.Time) bool {
 	d := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
@@ -33,7 +35,7 @@ func nextDateByDays(now time.Time, d time.Time, q string) (string, error) {
 			break
 		}
 	}
-	return d.Format("20060102"), nil
+	return d.Format(format), nil
 }
 
 func nextDateByYear(now time.Time, d time.Time) (string, error) {
@@ -43,7 +45,7 @@ func nextDateByYear(now time.Time, d time.Time) (string, error) {
 			break
 		}
 	}
-	return d.Format("20060102"), nil
+	return d.Format(format), nil
 }
 
 func nextDateByWeekdays(now time.Time, q string) (string, error) {
@@ -68,7 +70,7 @@ func nextDateByWeekdays(now time.Time, q string) (string, error) {
 		}
 		for _, wd := range weekdays {
 			if dayOfWeek == wd {
-				return d.Format("20060102"), nil
+				return d.Format(format), nil
 			}
 		}
 		d = d.AddDate(0, 0, 1)
@@ -159,7 +161,7 @@ func nextDateByMonthDays(now time.Time, d time.Time, rule []string) (string, err
 	}
 
 	// 3. Ищем подходящий день
-	for {
+	for i := 0; i < 1000; i++ {
 		d = d.AddDate(0, 0, 1) // начинаем с завтра
 		// Если месяцы указаны и мы на нем прибавляем день
 		if len(months) > 0 && !contains(months, int(d.Month())) {
@@ -167,9 +169,10 @@ func nextDateByMonthDays(now time.Time, d time.Time, rule []string) (string, err
 		}
 		// Выходим если день совпал
 		if matchesDay(d, days) && AfterNow(d, now) {
-			return d.Format("20060102"), nil
+			return d.Format(format), nil
 		}
 	}
+	return "", errors.New("не найдена подходящая дата")
 }
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 	// Пустое правило
@@ -177,13 +180,15 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return "", nil // задача удаляется
 	}
 	// Парсим дату
-	d, err := time.Parse("20060102", dstart)
+	d, err := time.Parse(format, dstart)
 	if err != nil {
 		return "", errors.New("неверный формат даты")
 	}
 	// Определяем правило
 	rule := strings.Fields(repeat)
-
+	if len(rule) == 0 {
+		return "", nil
+	}
 	switch rule[0] {
 	case "d":
 		if len(rule) != 2 {
